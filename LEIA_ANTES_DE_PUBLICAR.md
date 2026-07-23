@@ -1,16 +1,9 @@
-# Marco Iris Tecnologia v2.5.4 — pacote público
+# Marco Iris Tecnologia v2.5.5 — pacote público
 
-Este pacote contém somente o código do aplicativo e pode ser usado na homologação do GitHub Pages.
+Este é o único pacote destinado ao GitHub/GitHub Pages.
 
-## Nunca publicar junto
+Ele não contém dados migrados, clientes, PDFs históricos, fotos, planilhas ou arquivos privados. Publique o conteúdo desta pasta na raiz do repositório de homologação e force uma atualização usando `atualizar.html` ou Ctrl+F5.
 
-- a pasta `migration/`;
-- o pacote privado de migração;
-- `Marco_Iris_Dados.migrado.json`;
-- PDFs, fotos, planilhas ou documentos de clientes.
+A versão passou em 123 verificações automatizadas locais. Google Drive real, WhatsApp real, bridge Borion real e sincronização em dois dispositivos ainda exigem o checklist manual `CHECKLIST_HOMOLOGACAO_MARCO_V2_5_5.md`.
 
-A migração histórica é feita pelo navegador: o operador abre o aplicativo público, conecta o Google Drive e seleciona localmente a pasta privada. Os arquivos privados não precisam e não devem passar pelo GitHub.
-
-Na tela **Configurações → Backup e migração**, use o cartão **Migração histórica preparada**. Não use a migração genérica do AppSheet para este pacote.
-
-Antes de produção, siga `CHECKLIST_HOMOLOGACAO_MARCO_V2_5_4.md`. Os testes locais passaram, mas Google Drive, WhatsApp e sincronização entre dispositivos precisam da homologação manual com as contas reais.
+Nunca misture este pacote com o ZIP privado de migração.

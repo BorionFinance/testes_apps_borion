@@ -103,29 +103,31 @@ function normalizeState(){
 }
 function addAudit(action,detail=''){data().audit.unshift({id:`audit_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,date:nowIso(),action,detail});data().audit=data().audit.slice(0,300);}
 function cloudReason(action=''){return String(action||'alteracao').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'alteracao';}
-async function publishBridgeConfirmed(){
+async function publishBridgeConfirmed(stateSnapshot=STATE){
   if(!window.MarcoBorionInterop?.publish)return {skipped:true};
   const status=window.MarcoBorionInterop.getRuntimeStatus?.();
   if(!status?.ready||!status?.initialSyncComplete)return {skipped:true,blocked:true,message:status?.reason||'Integração ainda não liberada.'};
-  const result=await window.MarcoBorionInterop.publish(STATE);
+  const result=await window.MarcoBorionInterop.publish(stateSnapshot);
   const confirmed=Array.isArray(result?.destinations)&&result.destinations.some(x=>x==='google-drive'||x==='google-unchanged');
   if(result?.blocked||!confirmed)throw new Error(result?.message||result?.errors?.join(' · ')||'O arquivo marco-iris.bridge.json não foi confirmado no Google Drive.');
   return result;
 }
-async function flushCloudState(reason='alteracao',{backup=false,retryMedia=true}={}){
+async function flushCloudState(reason='alteracao',{backup=false,retryMedia=true,stateSnapshot=null}={}){
   if(!navigator.onLine)throw new Error('Internet obrigatória. A alteração não foi salva.');
   if(!window.GoogleDriveMarco?.isConfigured?.())throw new Error('Google Drive desconectado. Entre novamente antes de alterar dados.');
   if(retryMedia)await syncPendingMedia();
-  window.MarcoBorionInterop?.prepareState?.(STATE);
+  const committedState=stateSnapshot?clone(stateSnapshot):clone(STATE);
+  window.MarcoBorionInterop?.prepareState?.(committedState);
   let baseCommitted=false;
   try{
-    await GoogleDriveMarco.enqueueSave(STATE,{backup,reason:cloudReason(reason)});
+    await GoogleDriveMarco.enqueueSave(committedState,{backup,reason:cloudReason(reason)});
     baseCommitted=true;
     CLOUD_PENDING_LOCAL=false;
-    const bridge=await publishBridgeConfirmed();
-    return {saved:true,bridge};
+    const bridge=await publishBridgeConfirmed(committedState);
+    return {saved:true,bridge,stateSnapshot:committedState};
   }catch(error){
     error.baseCommitted=baseCommitted;
+    error.stateSnapshot=committedState;
     throw error;
   }
 }
@@ -708,7 +710,7 @@ function renderLogin(entry=''){
         <div class="lock-feature"><div class="lock-feature-icon">${icon('cloud')}</div><div><strong>Soluções em nuvem</strong><small>Fotos, PDFs, anexos e dados organizados no Google Drive.</small></div></div>
       </div>
     </section>
-    <footer class="lock-footer"><div class="lock-footer-cards"><div class="lock-footer-card"><strong><span class="status-dot-live"></span> Sistema operacional</strong><small>Interface pronta para uso.</small></div><div class="lock-footer-card"><strong>${icon('cloud')} Google Drive e backups</strong><small>Dados e arquivos em pastas separadas.</small></div><div class="lock-footer-card"><strong>${icon('download')} Aplicativo PWA</strong><small>Instalação no computador e celular.</small></div></div><div class="lock-footer-meta"><strong>Marco Iris Tecnologia © 2026</strong><span>v2.5.4</span></div></footer>
+    <footer class="lock-footer"><div class="lock-footer-cards"><div class="lock-footer-card"><strong><span class="status-dot-live"></span> Sistema operacional</strong><small>Interface pronta para uso.</small></div><div class="lock-footer-card"><strong>${icon('cloud')} Google Drive e backups</strong><small>Dados e arquivos em pastas separadas.</small></div><div class="lock-footer-card"><strong>${icon('download')} Aplicativo PWA</strong><small>Instalação no computador e celular.</small></div></div><div class="lock-footer-meta"><strong>Marco Iris Tecnologia © 2026</strong><span>v2.5.5</span></div></footer>
   </main>`;
   startLockNetwork();
 }
@@ -1227,7 +1229,7 @@ async function boot(){
   if(!navigator.onLine){renderCloudRequired();return;}
   renderLogin();
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('./sw.js?v=2.5.4').then(reg=>reg?.update?.()).catch(e=>console.warn('Service worker:',e));
+    navigator.serviceWorker.register('./sw.js?v=2.5.5').then(reg=>reg?.update?.()).catch(e=>console.warn('Service worker:',e));
   }
   window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.__installPrompt=e;});
   window.addEventListener('offline',()=>renderCloudRequired('A internet caiu. O aplicativo foi bloqueado para evitar qualquer alteração fora do Google Drive.'));
