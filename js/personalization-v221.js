@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='2.5.5';
+  const VERSION='2.5.8';
   const SCHEMA=9;
   const SNAP_DISTANCE=8;
   const HISTORY_LIMIT=30;

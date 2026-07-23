@@ -4,7 +4,7 @@
  * Camada integrada de regras, telas e migração. Executada antes do boot.
  */
 (() => {
-  const PTS_VERSION = '2.5.5';
+  const PTS_VERSION = '2.5.8';
   const OPERATIONAL_STATUSES = ['Orçamento','Em andamento','Aguardando peça','Concluída','Cancelada'];
   const PAYMENT_METHODS = ['Pix','Dinheiro','Débito','Crédito (À vista)','Crédito 2x','Crédito 3x','Crédito 4x','Crédito 5x','Crédito 6x','Crédito 7x','Crédito 8x','Crédito 9x','Crédito 10x','Crédito 11x','Crédito 12x','Boleto','Transferência','Outro'];
   const EQUIPMENT_TYPES = ['Computador Gamer','Computador de Escritório','Notebook Gamer','Notebook','Celular','Monitor','Impressora','Console','Game Stick','Rack','Teclado','Roteador','Mouse'];
@@ -418,35 +418,46 @@
   }
   function dashboardRevenueModel(){
     const s=currentProfileSettings(),period=['day','month','year'].includes(s.dashboardRevenuePeriod)?s.dashboardRevenuePeriod:'month';
-    const receiptMap=new Map(),expenseMap=new Map(),taxMap=new Map(),serviceMap=new Map(),productMap=new Map(),methodMap=new Map();
+    const receiptMap=new Map(),expenseMap=new Map(),taxMap=new Map(),serviceMap=new Map(),productMap=new Map(),methodMap=new Map(),serviceMethodMap=new Map();
     const add=(map,key,value)=>{if(key)map.set(key,(map.get(key)||0)+num(value));};
     const addMethod=(key,method,value)=>{if(!key)return;const methods=methodMap.get(key)||new Map(),label=String(method||'Não informado').trim()||'Não informado';methods.set(label,(methods.get(label)||0)+num(value));methodMap.set(key,methods);};
+    const addServiceMethod=(key,method,value)=>{if(!key)return;const methods=serviceMethodMap.get(key)||new Map(),label=String(method||'Não informado').trim()||'Não informado';methods.set(label,(methods.get(label)||0)+num(value));serviceMethodMap.set(key,methods);};
     for(const payment of data().payments||[]){
       if(paymentIsCancelled(payment)||!paymentIsPaid(payment))continue;
       const date=payment.paymentDate||payment.dueDate||payment.createdAt,key=revenueBucketKey(date,period);if(!key)continue;
       const type=normalizeText(payment.type),value=num(payment.value),fee=num(payment.fee);
-      if(type==='despesa'){add(expenseMap,key,value);if(/imposto|taxa|tribut/.test(normalizeText(payment.category||payment.notes)))add(taxMap,key,value);continue;}
+      if(type==='despesa'){if(/imposto|taxa|tribut/.test(normalizeText(payment.category||payment.notes)))add(taxMap,key,value);else add(expenseMap,key,value);continue;}
       add(receiptMap,key,value);add(taxMap,key,fee);addMethod(key,payment.paymentMethod||payment.method||payment.form,value);
       const order=findOrder(payment.orderId),items=order?orderItems(order.id):[];
       const serviceTotal=items.filter(x=>normalizeText(x.type)==='servico').reduce((sum,x)=>sum+num(x.subtotal),0);
       const productTotal=items.filter(x=>normalizeText(x.type)==='produto').reduce((sum,x)=>sum+num(x.subtotal),0);
-      const base=serviceTotal+productTotal;
-      if(base>0){add(serviceMap,key,value*(serviceTotal/base));add(productMap,key,value*(productTotal/base));}
-      else add(serviceMap,key,value);
+      const base=serviceTotal+productTotal,serviceValue=base>0?value*(serviceTotal/base):value;
+      if(base>0){add(serviceMap,key,serviceValue);add(productMap,key,value*(productTotal/base));}
+      else add(serviceMap,key,serviceValue);
+      addServiceMethod(key,payment.paymentMethod||payment.method||payment.form,serviceValue);
     }
     const keys=[...new Set([...receiptMap.keys(),...expenseMap.keys()])].sort();
     const limit=period==='day'?31:period==='month'?12:8,visible=keys.slice(-limit);
     const selected=visible.includes(s.dashboardRevenueSelected)?s.dashboardRevenueSelected:(visible.at(-1)||'');
     s.dashboardRevenuePeriod=period;s.dashboardRevenueSelected=selected;
-    const points=visible.map(key=>({key,label:revenueBucketLabel(key,period),revenue:receiptMap.get(key)||0,service:serviceMap.get(key)||0,product:productMap.get(key)||0,expenses:expenseMap.get(key)||0,taxes:taxMap.get(key)||0,methods:[...(methodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1])}));
-    return {period,selected,points,selectedPoint:points.find(x=>x.key===selected)||{key:'',label:'Sem dados',revenue:0,service:0,product:0,expenses:0,taxes:0,methods:[]}};
+    const points=visible.map(key=>({key,label:revenueBucketLabel(key,period),revenue:receiptMap.get(key)||0,service:serviceMap.get(key)||0,product:productMap.get(key)||0,expenses:expenseMap.get(key)||0,taxes:taxMap.get(key)||0,methods:[...(methodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1]),serviceMethods:[...(serviceMethodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1])}));
+    return {period,selected,points,selectedPoint:points.find(x=>x.key===selected)||{key:'',label:'Sem dados',revenue:0,service:0,product:0,expenses:0,taxes:0,methods:[],serviceMethods:[]}};
   }
   function compositionRows255(parts){const max=Math.max(1,...parts.map(x=>num(x[1])));return parts.map(([label,value])=>`<div class="composition-row-v255"><span>${esc(label)}</span><div><i style="--composition-width:${Math.round(num(value)/max*100)}%"></i></div><b>${currency(value)}</b></div>`).join('');}
+  function servicePaymentRows255(entries=[]){
+    const standard=new Map([['Pix',0],['Débito',0],['Dinheiro',0],['Crédito',0]]),extras=new Map();
+    for(const [rawLabel,rawValue] of entries||[]){
+      const label=String(rawLabel||'Não informado').trim()||'Não informado',key=normalizeText(label),value=num(rawValue);
+      const canonical=key.includes('pix')?'Pix':key.includes('debito')?'Débito':key.includes('dinheiro')||key.includes('especie')?'Dinheiro':key.includes('credito')?'Crédito':'';
+      if(canonical)standard.set(canonical,(standard.get(canonical)||0)+value);else extras.set(label,(extras.get(label)||0)+value);
+    }
+    return [...standard.entries(),...extras.entries()].sort((a,b)=>{const base=['Pix','Débito','Dinheiro','Crédito'],ai=base.indexOf(a[0]),bi=base.indexOf(b[0]);if(ai>=0||bi>=0)return (ai<0?99:ai)-(bi<0?99:bi);return num(b[1])-num(a[1])||String(a[0]).localeCompare(String(b[0]),'pt-BR');});
+  }
   function dashboardRevenueBody(){
     const model=dashboardRevenueModel(),max=Math.max(1,...model.points.map(x=>x.revenue));
     const chart=model.points.length?`<div class="revenue-chart-v255" role="img" aria-label="Gráfico de faturamento">${model.points.map(x=>`<button type="button" class="revenue-bar-column-v255 ${x.key===model.selected?'is-selected':''}" data-action="dashboard-revenue-select" data-key="${attr(x.key)}" title="${attr(x.label)} · ${attr(currency(x.revenue))}"><span class="revenue-bar-v255" style="--revenue-height:${Math.max(4,Math.round(x.revenue/max*100))}%"></span><small>${esc(x.label)}</small></button>`).join('')}</div>`:'<div class="empty">Ainda não existem lançamentos para o período.</div>';
-    const p=model.selectedPoint,categories=[['Receita de Serviços',p.service],['Receita de Produtos',p.product],['Despesas',p.expenses],['Impostos',p.taxes]],methods=p.methods?.length?p.methods:[['Não informado',0]];
-    return `<div class="revenue-widget-v255"><div class="revenue-period-tabs-v255">${[['day','Dia'],['month','Mês'],['year','Ano']].map(([id,label])=>`<button type="button" class="${model.period===id?'active':''}" data-action="dashboard-revenue-period" data-period="${id}">${label}</button>`).join('')}</div>${chart}<div class="revenue-breakdowns-v255"><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Composição financeira · ${esc(p.label)}</strong><span>${currency(p.revenue)}</span></div>${compositionRows255(categories)}</div><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Formas de pagamento · ${esc(p.label)}</strong><span>${currency(p.revenue)}</span></div>${compositionRows255(methods)}</div></div></div>`;
+    const p=model.selectedPoint,categories=[['Receita de Serviços',p.service],['Receita de Produtos',p.product],['Despesas',p.expenses],['Impostos',p.taxes]],methods=servicePaymentRows255(p.serviceMethods);
+    return `<div class="revenue-widget-v255"><div class="revenue-period-tabs-v255">${[['day','Dia'],['month','Mês'],['year','Ano']].map(([id,label])=>`<button type="button" class="${model.period===id?'active':''}" data-action="dashboard-revenue-period" data-period="${id}">${label}</button>`).join('')}</div>${chart}<div class="revenue-breakdowns-v255"><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Composição financeira · ${esc(p.label)}</strong><span>${currency(p.revenue)}</span></div>${compositionRows255(categories)}</div><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Formas de pagamento da receita de serviços · ${esc(p.label)}</strong><span>${currency(p.service)}</span></div>${compositionRows255(methods)}</div></div></div>`;
   }
 
   renderDashboard = function(){

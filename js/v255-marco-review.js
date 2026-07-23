@@ -12,12 +12,12 @@
   const ENTITY_GROUPS={OSV:'serviceOrders',CLI:'clients',PRD:'products',SRV:'services',INS:'supplies',ITM:'orderItems',MOV:'stockMovements',AGE:'appointments',TER:'consents'};
   const SORT_SCHEMAS={
     orders:{labels:['OSV','Abertura','Cliente','Equipamento','Financeiro','Status','Valor'],types:['code','date','text','text','text','text','currency']},
-    clients:{labels:['Cliente','Contato','Cidade','Ordens','Total movimentado'],types:['text','text','text','number','currency']},
+    clients:{labels:['ID','Cliente','Contato','Cidade','Data de cadastro','Ordens','Total movimentado'],types:['code','text','text','text','date','number','currency']},
     finance:{labels:['Data','ID','Tipo','Cliente / OSV','Forma','Status','Taxa','Valor líquido'],types:['date','code','text','text','text','text','currency','currency']},
-    'catalog.services':{labels:['Serviço','Preço padrão','Execuções','Status'],types:['text','currency','number','text']},
-    'catalog.products':{labels:['Produto','Fornecedor','Custo','Margem','Venda','Estoque','Mínimo'],types:['text','text','currency','number','currency','number','number']},
-    'catalog.supplies':{labels:['Insumo','Fornecedor','Custo','Estoque','Mínimo'],types:['text','text','currency','number','number']},
-    'catalog.movements':{labels:['ID','Data','Item','Tipo','Quantidade','Estoque Antes → Estoque Depois','OSV','Observação'],types:['code','date','text','text','number','number','code','text']},
+    'catalog.services':{labels:['ID','Serviço','Preço padrão','Execuções','Status'],types:['code','text','currency','number','text']},
+    'catalog.products':{labels:['ID','Produto','Marca','Fornecedor','Custo','Margem','Venda','Estoque','Mínimo'],types:['code','text','text','text','currency','number','currency','number','number']},
+    'catalog.supplies':{labels:['ID','Insumo','Marca','Fornecedor','Custo','Estoque','Mínimo'],types:['code','text','text','text','currency','number','number']},
+    'catalog.movements':{labels:['ID','Data','Item','Tipo','Quantidade','Antes → Depois','OSV','Observação'],types:['code','date','text','text','number','number','code','text']},
     documents:{labels:['OSV','Cliente','Data/hora','Arquivo'],types:['code','text','date','text']}
   };
   const SAVE={requested:0,confirmed:0,running:false,retryTimer:0,retryDelay:5000,lastError:null,pending:[]};

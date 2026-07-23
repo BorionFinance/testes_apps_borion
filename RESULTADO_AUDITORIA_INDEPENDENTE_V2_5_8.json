@@ -1,0 +1,301 @@
+{
+  "checks": [
+    {
+      "name": "Sidebar permanece fixa durante rolagem",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Status de sincronização permanece acima das ações",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ações topo e lateral são exatamente olho/salvar/bloquear",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ordem exata dos controles de OSV",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Controles da OSV têm altura padronizada",
+      "ok": true,
+      "detail": "40,40,40,40"
+    },
+    {
+      "name": "Arquivadas é somente ícone com tooltip",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Privacidade cobre a tabela de OSV",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "OSV abre por teclado na visualização",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Controle interno cliente não dispara visualização da OSV",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cabeçalhos de clientes completos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Clientes arquivados é somente ícone com tooltip",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Privacidade cobre total movimentado de clientes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Financeiro mantém Novo, período e exportação no fim",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Exportar CSV é somente ícone",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Privacidade cobre Financeiro",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Documentos tem mês, De, Até e limpar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Vassoura limpa todo o período",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Serviços possui coluna ID",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Inativos é ícone compacto e alinhado",
+      "ok": true,
+      "detail": "40x98 / 40x98"
+    },
+    {
+      "name": "Produtos: ID, Produto, Marca, Fornecedor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Privacidade cobre custos e preços do catálogo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Insumos: ID, Insumo, Marca, Fornecedor",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Movimentações sem Marca/Fornecedor e com Antes → Depois",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Visualização OSV é larga no desktop",
+      "ok": true,
+      "detail": "1377.817626953125"
+    },
+    {
+      "name": "Cabeçalho redundante da OSV foi removido visualmente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "X permanece visível e clicável",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Anexos técnicos ficam depois de movimentações",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ações da OSV seguem 34x34",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Visualização da OSV possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Privacidade cobre a visualização da OSV",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Visualização cliente sem cabeçalho vazio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Visualização cliente possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar cliente abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar cliente possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar OSV abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar OSV possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar lançamento abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar lançamento possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar serviço abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar serviço possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar produto abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar produto possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar insumo abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar insumo possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar movimentação abre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Editar movimentação possui Editar layout",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Layout atual não é alterado antes de editar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Redimensionamento real altera largura/altura do bloco",
+      "ok": true,
+      "detail": "6/auto -> 8/11"
+    },
+    {
+      "name": "Layout redimensionado é salvo por perfil/tela",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Redimensionamento real do Faturamento atualiza configuração",
+      "ok": true,
+      "detail": "26 -> 47"
+    },
+    {
+      "name": "Módulo pequeno gera rolagem interna",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Celular mantém três ações no topo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Celular sem estouro horizontal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Modal da OSV cabe no celular",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Detalhes da OSV ficam em uma coluna no celular",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Alça de redimensionamento fica oculta no celular",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sem erros inesperados de runtime/console",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "mobile": {
+    "topActions": 3,
+    "noHorizontalOverflow": true,
+    "modalFits": true,
+    "detailOneColumn": true,
+    "resizeHandleHidden": true
+  },
+  "total": 57,
+  "passed": 57,
+  "failures": [],
+  "allPassed": true
+}

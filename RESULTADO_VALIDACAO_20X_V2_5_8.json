@@ -1,0 +1,136 @@
+{
+  "version": "2.5.8",
+  "generated_at": "2026-07-23T18:07:58.008Z",
+  "full_checklist_runs": 20,
+  "checks_per_run": 113,
+  "total_assertions": 2260,
+  "passed_assertions": 2260,
+  "all_passed": true,
+  "runs": [
+    {
+      "run": 1,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 2,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 3,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 4,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 5,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 6,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 7,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 8,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 9,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 10,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 11,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 12,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 13,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 14,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 15,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 16,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 17,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 18,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 19,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    },
+    {
+      "run": 20,
+      "passed": 113,
+      "total": 113,
+      "failures": []
+    }
+  ],
+  "sha256_test_script": "6f39d22ac8971e0375b4113ad7a888756e5be7d1dbd4e16b787d7b837247e7f1",
+  "limitations": [
+    "A autenticação e a gravação real na conta Google do Marco exigem homologação conectada.",
+    "A validação estrutural 20x é complementada por RESULTADO_NAVEGADOR_20X_V2_5_8.json, gerado em Chromium controlado com dados sintéticos."
+  ]
+}
