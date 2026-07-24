@@ -404,7 +404,7 @@
           const preserveCurrent=!applySaved&&!forceDefaults&&!!item.style.getPropertyValue('--layout-x-v260');
           const current=preserveCurrent?modalItemRect256(item,index):null;
           const span=Math.max(2,Math.min(12,Number(saved?.span)||Number(current?.span)||modalDefaultSpan256(item,key,grid)));
-          const rows=Math.max(4,Math.min(60,Number(saved?.rows)||Number(current?.rows)||modalDefaultRows256(item)));
+          const rows=Math.max(2,Math.min(60,Number(saved?.rows)||Number(current?.rows)||modalDefaultRows256(item)));
           let x=Number(saved?.x)||Number(current?.x)||0,y=Number(saved?.y)||Number(current?.y)||0;
           const proposed={id,x,y,span,rows,order:Number.isFinite(Number(saved?.order))?Number(saved.order):Number.isFinite(Number(current?.order))?Number(current.order):index};
           if(!x||!y||!modalCanPlace256(proposed,placed,id))({x,y}=modalFirstFree256(span,rows,placed));
