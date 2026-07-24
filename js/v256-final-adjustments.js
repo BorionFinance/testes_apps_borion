@@ -1,11 +1,11 @@
 'use strict';
 
-/* Marco Iris Tecnologia v2.6.0 — ajustes finais solicitados após a migração.
+/* Marco Iris Tecnologia v2.6.2 — ajustes finais solicitados após a migração.
  * Esta camada é carregada por último para preservar a base histórica e substituir
  * somente apresentação, filtros, cliques e personalização visual.
  */
 (() => {
-  const VERSION='2.6.0';
+  const VERSION='2.6.2';
   const ORDER_STATUSES=['Orçamento','Em andamento','Aguardando peça','Concluída','Cancelada'];
   const INTERACTIVE_SELECTOR='button,a,input,select,textarea,label,summary,details,[role="button"],[contenteditable="true"]';
   const ENTITY_EDIT_ACTION={service:'edit-service',product:'edit-product',supply:'edit-supply',movement:'edit-stock-movement'};
@@ -78,6 +78,29 @@
   function ensureDefaults256(){
     if(typeof STATE==='undefined'||!STATE?.dataByProfile)return;
     const s=settings();s.migrations=s.migrations||{};s.dashboardLayouts=s.dashboardLayouts||{};
+    const compactRowsById=(id)=>{
+      id=String(id||'');
+      if(id==='clientId')return 3;
+      if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories','name','phone','document','address','zip','number','city','state','neighborhood','complement'].includes(id))return 2;
+      if(['reportedIssue','technicalReport','clientNotes','internalNotes','notes'].includes(id))return 4;
+      return 0;
+    };
+    if(!s.migrations.layoutCompactFieldsV262){
+      const layouts=s.unifiedLayoutsV256||{};
+      for(const band of Object.keys(layouts)){
+        for(const key of Object.keys(layouts[band]||{})){
+          const store=layouts[band][key]||{};
+          for(const gridKey of Object.keys(store)){
+            const gridStore=store[gridKey]||{};
+            for(const itemId of Object.keys(gridStore)){
+              const target=compactRowsById(itemId);
+              if(target&&Number(gridStore[itemId]?.rows||0)>target)gridStore[itemId].rows=target;
+            }
+          }
+        }
+      }
+      s.migrations.layoutCompactFieldsV262={version:VERSION,appliedAt:new Date().toISOString()};
+    }
     if(!s.migrations.revenueExpandedV257){
       for(const band of ['desktop','tablet','mobile']){
         const store=s.dashboardLayouts[band]||(s.dashboardLayouts[band]={}),existing=store.revenue||{},hadSaved=!!store.revenue;
@@ -272,14 +295,14 @@
   function modalDefaultRows256(item){
     const id=String(item.dataset.osvComponent||item.dataset.clientComponent||item.dataset.layoutComponent||item.dataset.layoutItemV256||'');
     // Campos comuns começam baixos; o usuário continua podendo aumentar pelo canto.
-    if(id==='clientId')return 4;
-    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 4;
-    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 8;
+    if(id==='clientId')return 3;
+    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 2;
+    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 4;
     if(id==='itemsField')return 22;
     if(['paymentsField','photosField'].includes(id))return 16;
     const isField=item.matches('.field'),isCheck=item.matches('.check-field'),hasTextarea=!!item.querySelector('textarea');
-    if(isCheck)return 4;
-    if(isField)return hasTextarea?8:4;
+    if(isCheck)return 2;
+    if(isField)return hasTextarea?4:2;
     if(item.matches('.form-section,section.card')){
       if(item.querySelector('table,[data-photo-stage],[data-order-items-editor],#order-items-editor,#order-payments-editor'))return 18;
       return 12;
@@ -289,7 +312,7 @@
   function modalItemRect256(item,index=0){
     const id=item.dataset.layoutItemV256||`item-${index}`;
     const span=Math.max(2,Math.min(12,Number(item.style.getPropertyValue('--layout-span-v256'))||6));
-    const rows=Math.max(4,Math.min(60,Number(item.style.getPropertyValue('--layout-rows-v256'))||modalDefaultRows256(item)));
+    const rows=Math.max(2,Math.min(60,Number(item.style.getPropertyValue('--layout-rows-v256'))||modalDefaultRows256(item)));
     const x=Math.max(1,Math.min(13-span,Number(item.style.getPropertyValue('--layout-x-v260'))||1));
     const y=Math.max(1,Number(item.style.getPropertyValue('--layout-y-v260'))||1);
     const order=Number(item.style.getPropertyValue('--layout-order-v256'));
@@ -318,7 +341,7 @@
       items.map((item,index)=>({item,index,rect:modalItemRect256(item,index)}))
         .sort((a,b)=>(a.rect.order-b.rect.order)||(a.index-b.index))
         .forEach(({item,index,rect})=>{
-          let normalized={...rect,span:Math.max(2,Math.min(12,rect.span)),rows:Math.max(4,Math.min(60,rect.rows))};
+          let normalized={...rect,span:Math.max(2,Math.min(12,rect.span)),rows:Math.max(2,Math.min(60,rect.rows))};
           normalized.x=Math.max(1,Math.min(13-normalized.span,normalized.x));normalized.y=Math.max(1,normalized.y);
           if(repair&&!modalCanPlace256(normalized,placed,normalized.id))normalized={...normalized,...modalFirstFree256(normalized.span,normalized.rows,placed)};
           applyModalRect256(item,{...normalized,order:Number.isFinite(normalized.order)?normalized.order:index});
@@ -570,11 +593,11 @@
     item.classList.add('is-resizing-v256');event.currentTarget.setPointerCapture?.(event.pointerId);
   }
   function moveResize256(event){
-    const session=RESIZE_SESSION;if(!session||session.pointerId!==event.pointerId)return;const width=Math.max(session.cell,session.startWidth+(event.clientX-session.startX)),height=Math.max(session.rowUnit*4,session.startHeight+(event.clientY-session.startY));
+    const session=RESIZE_SESSION;if(!session||session.pointerId!==event.pointerId)return;const width=Math.max(session.cell,session.startWidth+(event.clientX-session.startX)),height=Math.max(session.rowUnit*2,session.startHeight+(event.clientY-session.startY));
     if(session.kind==='dashboard'){
       const span=session.columns===1?12:Math.max(3,Math.min(12,Math.round((width+session.gap)/(session.cell+session.gap))));session.item.style.setProperty('--widget-span-v256',span);session.item.style.setProperty('--widget-rows-v256',Math.max(8,Math.min(60,Math.round(height/session.rowUnit))));
     }else{
-      const current=modalItemRect256(session.item),span=session.columns===1?12:Math.max(2,Math.min(12,Math.round((width+session.gap)/(session.cell+session.gap)))),rows=Math.max(4,Math.min(60,Math.round(height/session.rowUnit)));
+      const current=modalItemRect256(session.item),span=session.columns===1?12:Math.max(2,Math.min(12,Math.round((width+session.gap)/(session.cell+session.gap)))),rows=Math.max(2,Math.min(60,Math.round(height/session.rowUnit)));
       const candidate={...current,span,x:Math.min(current.x,MODAL_GRID_COLUMNS-span+1),rows};
       if(modalCanPlace256(candidate,modalGridRects256(session.grid),candidate.id)){applyModalRect256(session.item,candidate);updateModalGridHeight256(session.grid);}
     }

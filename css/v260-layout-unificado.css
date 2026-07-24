@@ -9,15 +9,15 @@
   grid-auto-flow:row!important;
   grid-auto-rows:22px!important;
   column-gap:12px!important;
-  row-gap:6px!important;
+  row-gap:4px!important;
   align-items:stretch!important;
   width:100%!important;
   min-width:0!important;
   min-height:calc(var(--layout-grid-rows-v260,1) * 22px)!important;
   height:auto!important;
-  overflow:visible!important;
-  padding:12px!important;
-  margin:14px 0!important;
+  overflow:hidden!important;
+  padding:8px!important;
+  margin:10px 0!important;
   box-sizing:border-box!important;
 }
 #modal-root .modal [data-layout-grid-v256] > [data-layout-item-v256]{
@@ -27,7 +27,7 @@
   right:auto!important;
   bottom:auto!important;
   grid-column:var(--layout-x-v260,1) / span min(var(--layout-span-v256,6),12)!important;
-  grid-row:var(--layout-y-v260,1) / span var(--layout-rows-v256,8)!important;
+  grid-row:var(--layout-y-v260,1) / span var(--layout-rows-v256,2)!important;
   order:0!important;
   width:auto!important;
   min-width:0!important;
@@ -36,7 +36,7 @@
   max-height:none!important;
   margin:0!important;
   box-sizing:border-box!important;
-  overflow:auto!important;
+  overflow:hidden!important;
   overscroll-behavior:contain!important;
 }
 #modal-root .modal.layout-editing-v256 [data-layout-grid-v256].layout-grid-v256{
@@ -52,7 +52,7 @@
   background-position:12px 12px!important;
 }
 #modal-root .modal.layout-editing-v256 [data-layout-item-v256]{
-  padding:10px 12px 12px!important;
+  padding:4px 6px 6px!important;
   border:1px dashed rgba(126,184,242,.48)!important;
   border-radius:12px!important;
   background:rgba(8,35,66,.88)!important;
@@ -69,7 +69,7 @@
 }
 #modal-root .modal.layout-editing-v256 [data-layout-item-v256].layout-field-v259,
 #modal-root .modal.layout-editing-v256 [data-layout-item-v256].layout-check-v259{
-  overflow:visible!important;
+  overflow:hidden!important;
 }
 #modal-root .modal.layout-editing-v256 [data-layout-item-v256].layout-section-v259{
   overflow:auto!important;

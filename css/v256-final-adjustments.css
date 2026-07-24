@@ -70,8 +70,8 @@
 .layout-toolbar-v256{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:6px}
 .layout-toolbar-v256 small{max-width:320px;color:var(--modal-muted,#aac0d6);font-size:.7rem}
 .layout-grid-v256{position:relative}
-.layout-editing-v256 .layout-grid-v256{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;grid-auto-flow:dense!important;grid-auto-rows:22px!important;gap:10px!important;outline:2px dashed rgba(82,165,255,.42)!important;outline-offset:5px!important;border-radius:13px!important;margin:10px 0!important;padding:7px!important}
-.layout-editing-v256 [data-layout-item-v256]{position:relative!important;grid-column:span min(var(--layout-span-v256,6),12)!important;grid-row:span var(--layout-rows-v256,5)!important;min-width:0!important;min-height:88px!important;overflow:auto!important;margin:0!important;padding:10px 10px 10px!important;border:1px dashed rgba(126,184,242,.38)!important;border-radius:12px!important;background:rgba(8,35,66,.76)!important;cursor:grab!important}
+.layout-editing-v256 .layout-grid-v256{display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;grid-auto-flow:dense!important;grid-auto-rows:22px!important;gap:8px!important;outline:2px dashed rgba(82,165,255,.42)!important;outline-offset:5px!important;border-radius:13px!important;margin:10px 0!important;padding:6px!important}
+.layout-editing-v256 [data-layout-item-v256]{position:relative!important;grid-column:span min(var(--layout-span-v256,6),12)!important;grid-row:span var(--layout-rows-v256,2)!important;min-width:0!important;min-height:44px!important;overflow:hidden!important;margin:0!important;padding:4px 6px 6px!important;border:1px dashed rgba(126,184,242,.38)!important;border-radius:12px!important;background:rgba(8,35,66,.76)!important;cursor:grab!important}
 .layout-editing-v256 [data-layout-item-v256]::before{content:none!important;display:none!important}
 .layout-editing-v256 [data-layout-item-v256]:active{cursor:grabbing!important}
 .layout-editing-v256 [data-layout-item-v256]>.layout-resize-handle-v256{display:block!important}
@@ -160,3 +160,6 @@ form[data-layout-key-v256] .layout-grid-v256>[data-layout-item-v256].has-custom-
   }
 }
 .catalog-toolbar-v256 .tabs{margin-bottom:0!important}
+
+.layout-editing-v256 [data-layout-item-v256].layout-field-v259,.layout-editing-v256 [data-layout-item-v256].layout-check-v259{overflow:hidden!important}
+.layout-editing-v256 [data-layout-item-v256].layout-section-v259{overflow:auto!important}
