@@ -27,7 +27,7 @@
   right:auto!important;
   bottom:auto!important;
   grid-column:var(--layout-x-v260,1) / span min(var(--layout-span-v256,6),12)!important;
-  grid-row:var(--layout-y-v260,1) / span var(--layout-rows-v256,2)!important;
+  grid-row:var(--layout-y-v260,1) / span var(--layout-rows-v256,8)!important;
   order:0!important;
   width:auto!important;
   min-width:0!important;

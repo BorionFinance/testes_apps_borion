@@ -1,11 +1,11 @@
 'use strict';
 
-/* Marco Iris Tecnologia v2.6.2 — ajustes finais solicitados após a migração.
+/* Marco Iris Tecnologia v2.6.3 — ajustes finais solicitados após a migração.
  * Esta camada é carregada por último para preservar a base histórica e substituir
  * somente apresentação, filtros, cliques e personalização visual.
  */
 (() => {
-  const VERSION='2.6.2';
+  const VERSION='2.6.3';
   const ORDER_STATUSES=['Orçamento','Em andamento','Aguardando peça','Concluída','Cancelada'];
   const INTERACTIVE_SELECTOR='button,a,input,select,textarea,label,summary,details,[role="button"],[contenteditable="true"]';
   const ENTITY_EDIT_ACTION={service:'edit-service',product:'edit-product',supply:'edit-supply',movement:'edit-stock-movement'};
@@ -78,14 +78,14 @@
   function ensureDefaults256(){
     if(typeof STATE==='undefined'||!STATE?.dataByProfile)return;
     const s=settings();s.migrations=s.migrations||{};s.dashboardLayouts=s.dashboardLayouts||{};
-    const compactRowsById=(id)=>{
+    const normalRowsById=(id)=>{
       id=String(id||'');
-      if(id==='clientId')return 3;
-      if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories','name','phone','document','address','zip','number','city','state','neighborhood','complement'].includes(id))return 2;
-      if(['reportedIssue','technicalReport','clientNotes','internalNotes','notes'].includes(id))return 4;
+      if(id==='clientId')return 4;
+      if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories','name','phone','document','address','zip','number','city','state','neighborhood','complement'].includes(id))return 4;
+      if(['reportedIssue','technicalReport','clientNotes','internalNotes','notes'].includes(id))return 8;
       return 0;
     };
-    if(!s.migrations.layoutCompactFieldsV262){
+    if(!s.migrations.layoutNormalDefaultsV263){
       const layouts=s.unifiedLayoutsV256||{};
       for(const band of Object.keys(layouts)){
         for(const key of Object.keys(layouts[band]||{})){
@@ -93,13 +93,13 @@
           for(const gridKey of Object.keys(store)){
             const gridStore=store[gridKey]||{};
             for(const itemId of Object.keys(gridStore)){
-              const target=compactRowsById(itemId);
-              if(target&&Number(gridStore[itemId]?.rows||0)>target)gridStore[itemId].rows=target;
+              const target=normalRowsById(itemId);
+              if(target&&Number(gridStore[itemId]?.rows||0)<target)gridStore[itemId].rows=target;
             }
           }
         }
       }
-      s.migrations.layoutCompactFieldsV262={version:VERSION,appliedAt:new Date().toISOString()};
+      s.migrations.layoutNormalDefaultsV263={version:VERSION,appliedAt:new Date().toISOString()};
     }
     if(!s.migrations.revenueExpandedV257){
       for(const band of ['desktop','tablet','mobile']){
@@ -295,14 +295,14 @@
   function modalDefaultRows256(item){
     const id=String(item.dataset.osvComponent||item.dataset.clientComponent||item.dataset.layoutComponent||item.dataset.layoutItemV256||'');
     // Campos comuns começam baixos; o usuário continua podendo aumentar pelo canto.
-    if(id==='clientId')return 3;
-    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 2;
-    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 4;
+    if(id==='clientId')return 4;
+    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 4;
+    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 8;
     if(id==='itemsField')return 22;
     if(['paymentsField','photosField'].includes(id))return 16;
     const isField=item.matches('.field'),isCheck=item.matches('.check-field'),hasTextarea=!!item.querySelector('textarea');
-    if(isCheck)return 2;
-    if(isField)return hasTextarea?4:2;
+    if(isCheck)return 4;
+    if(isField)return hasTextarea?8:4;
     if(item.matches('.form-section,section.card')){
       if(item.querySelector('table,[data-photo-stage],[data-order-items-editor],#order-items-editor,#order-payments-editor'))return 18;
       return 12;
