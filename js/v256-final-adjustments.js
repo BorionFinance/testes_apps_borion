@@ -1,11 +1,11 @@
 'use strict';
 
-/* Marco Iris Tecnologia v2.5.8 — ajustes finais solicitados após a migração.
+/* Marco Iris Tecnologia v2.5.9 — ajustes finais solicitados após a migração.
  * Esta camada é carregada por último para preservar a base histórica e substituir
  * somente apresentação, filtros, cliques e personalização visual.
  */
 (() => {
-  const VERSION='2.5.8';
+  const VERSION='2.5.9';
   const ORDER_STATUSES=['Orçamento','Em andamento','Aguardando peça','Concluída','Cancelada'];
   const INTERACTIVE_SELECTOR='button,a,input,select,textarea,label,summary,details,[role="button"],[contenteditable="true"]';
   const ENTITY_EDIT_ACTION={service:'edit-service',product:'edit-product',supply:'edit-supply',movement:'edit-stock-movement'};
