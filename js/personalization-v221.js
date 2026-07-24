@@ -1,6 +1,6 @@
 (() => {
   'use strict';
-  const VERSION='2.5.9';
+  const VERSION='2.6.0';
   const SCHEMA=9;
   const SNAP_DISTANCE=8;
   const HISTORY_LIMIT=30;
@@ -445,7 +445,8 @@
     Object.entries(nodes).forEach(([id,node])=>{if(!node)return;node.dataset.osvComponent=id;if(id!=='actionButtons')surface.appendChild(node);});
     if(nodes.actionButtons)surface.after(nodes.actionButtons);
     form.querySelectorAll(':scope > .form-grid').forEach(g=>{if(!g.children.length)g.remove();});
-    applyOrderLayout221(form);
+    if(window.MarcoV256?.decorateModal)requestAnimationFrame(()=>window.MarcoV256.decorateModal());
+    else applyOrderLayout221(form);
   }
 
   function watchOrderForm221(){
@@ -481,7 +482,7 @@
     const rows=[];sorted.forEach(item=>{let row=rows.find(r=>Math.abs(r.sourceY-item.p.y)<=14);if(!row){row={sourceY:item.p.y,items:[]};rows.push(row);}row.items.push(item);});rows.sort((a,b)=>a.sourceY-b.sourceY);
     let cursor=16,previousSource=0,previousDeclared=0;rows.forEach((row,index)=>{const sourceGap=index?Math.max(12,row.sourceY-previousSource-previousDeclared):Math.max(0,row.sourceY-16);cursor+=sourceGap;let rowHeight=0;row.items.forEach(item=>{item.el.style.top=`${cursor}px`;item.el.style.left=`${(item.p.x/canvasWidth)*100}%`;item.el.style.width=`${(item.p.width/canvasWidth)*100}%`;rowHeight=Math.max(rowHeight,item.el.scrollHeight,item.el.offsetHeight,item.p.height||0);});previousSource=row.sourceY;previousDeclared=Math.max(...row.items.map(x=>x.p.height||0));cursor+=rowHeight;});surface.style.height=`${Math.max(260,cursor+24)}px`;
   }
-  function applyOrderLayout221(form){applyVisualSurfaceLayout221(form?.querySelector('[data-layout-surface="order"]'),settings().osvLayout||defaultOrderLayout(),'data-osv-component','order');}
+  function applyOrderLayout221(form){if(window.MarcoV256){const modal=form?.closest('.modal');const surface=form?.querySelector('[data-layout-surface="order"]');if(surface&&!surface.dataset.layoutGridV256)window.MarcoV256.decorateModal?.();else window.MarcoV256.refreshModalGrid?.(modal,false);return;}applyVisualSurfaceLayout221(form?.querySelector('[data-layout-surface="order"]'),settings().osvLayout||defaultOrderLayout(),'data-osv-component','order');}
   function applyClientLayout221(form=document.querySelector('#modal-root form[data-form="client"]')){applyVisualSurfaceLayout221(form?.querySelector('[data-layout-surface="client"]'),settings().clientFormLayout||defaultClientLayout(),'data-client-component','client');}
 
 

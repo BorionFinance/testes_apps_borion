@@ -1,8 +1,8 @@
 'use strict';
 
-/* Marco Iris Tecnologia v2.5.9 — coordenadas livres e correções estruturais. */
+/* Marco Iris Tecnologia v2.6.0 — coordenadas livres e correções estruturais. */
 (() => {
-  const VERSION='2.5.9';
+  const VERSION='2.6.0';
   const GRID_COLUMNS=12;
   const GRID_ROW=22;
   const GRID_ROW_GAP=4;
@@ -175,24 +175,9 @@
       item.classList.toggle('layout-field-v259',isField);
       item.classList.toggle('layout-check-v259',isCheck);
       item.classList.toggle('layout-section-v259',!isField&&!isCheck);
-      const current=Number(item.style.getPropertyValue('--layout-rows-v256'))||0;
-      const hasTextarea=!!item.querySelector('textarea');
-      const minimumRows=isField?(hasTextarea?12:8):isCheck?6:8;
-      const natural=Math.max(item.scrollHeight||0,item.getBoundingClientRect().height||0,isField?170:isCheck?132:190);
-      const capped=Math.min(natural,!isField&&!isCheck?650:340);
-      let required=clamp259(Math.ceil((capped+6)/(GRID_ROW+6)),minimumRows,!isField&&!isCheck?28:14);
-      if(current>required)required=current;
-      item.style.setProperty('--layout-rows-v256',required);
       item.classList.add('has-custom-layout-v256');
-      requestAnimationFrame(()=>{
-        if(!item.isConnected||!item.closest('.layout-editing-v256'))return;
-        const overflow=Math.max(0,item.scrollHeight-item.clientHeight);
-        if(overflow>2){
-          const extra=Math.ceil(overflow/(GRID_ROW+6))+1;
-          item.style.setProperty('--layout-rows-v256',clamp259(required+extra,minimumRows,!isField&&!isCheck?32:18));
-        }
-      });
     });
+    window.MarcoV256?.refreshModalGrid?.(modal,false);
     const body=modal.querySelector(':scope > .modal-body');if(body&&body.scrollTop<4)body.scrollTop=0;
   }
   function scheduleModalStabilize259(){
@@ -201,6 +186,11 @@
   }
   const modalRoot=document.getElementById('modal-root');
   if(modalRoot)new MutationObserver(mutations=>{
+    if(mutations.some(m=>m.type==='childList')){
+      const modal=modalRoot.querySelector('.modal');
+      const unpreparedSurface=modal?.querySelector('[data-layout-surface]:not([data-layout-grid-v256])');
+      if(unpreparedSurface)requestAnimationFrame(()=>window.MarcoV256?.decorateModal?.());
+    }
     if(mutations.some(m=>m.type==='childList'||(m.type==='attributes'&&m.target.classList?.contains('layout-editing-v256'))))scheduleModalStabilize259();
   }).observe(modalRoot,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
 

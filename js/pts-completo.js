@@ -4,7 +4,7 @@
  * Camada integrada de regras, telas e migração. Executada antes do boot.
  */
 (() => {
-  const PTS_VERSION = '2.5.9';
+  const PTS_VERSION = '2.6.0';
   const OPERATIONAL_STATUSES = ['Orçamento','Em andamento','Aguardando peça','Concluída','Cancelada'];
   const PAYMENT_METHODS = ['Pix','Dinheiro','Débito','Crédito (À vista)','Crédito 2x','Crédito 3x','Crédito 4x','Crédito 5x','Crédito 6x','Crédito 7x','Crédito 8x','Crédito 9x','Crédito 10x','Crédito 11x','Crédito 12x','Boleto','Transferência','Outro'];
   const EQUIPMENT_TYPES = ['Computador Gamer','Computador de Escritório','Notebook Gamer','Notebook','Celular','Monitor','Impressora','Console','Game Stick','Rack','Teclado','Roteador','Mouse'];
@@ -406,42 +406,72 @@
     return Math.max(1,Math.min(4,num(s.dashboardColumns[band])||fallback));
   }
   function revenueBucketKey(date,period){
-    const raw=String(date||'').slice(0,10);if(!raw)return '';
+    const raw=String(date||'').slice(0,10);if(!/^\d{4}-\d{2}-\d{2}$/.test(raw))return '';
     if(period==='year')return raw.slice(0,4);
     if(period==='day')return raw;
     return raw.slice(0,7);
   }
   function revenueBucketLabel(key,period){
     if(period==='year')return key;
-    if(period==='day')return formatDate(key);
-    const [y,m]=String(key).split('-');return m&&y?new Intl.DateTimeFormat('pt-BR',{month:'short',year:'2-digit'}).format(new Date(Number(y),Number(m)-1,1)):key;
+    if(period==='day')return String(key).slice(8,10);
+    const [y,m]=String(key).split('-');return m&&y?new Intl.DateTimeFormat('pt-BR',{month:'short'}).format(new Date(Number(y),Number(m)-1,1)).replace('.',''):key;
+  }
+  function revenueMonthLongLabel(key){
+    const [y,m]=String(key||'').split('-');
+    return m&&y?new Intl.DateTimeFormat('pt-BR',{month:'long',year:'numeric'}).format(new Date(Number(y),Number(m)-1,1)):String(key||'');
+  }
+  function revenueRangeYears255(years){
+    const current=Number(today().slice(0,4)),parsed=years.map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+    if(!parsed.length)return [String(current)];
+    const first=parsed[0],last=parsed.at(-1),result=[];
+    for(let year=first;year<=last;year++)result.push(String(year));
+    return result;
   }
   function dashboardRevenueModel(){
     const s=currentProfileSettings(),period=['day','month','year'].includes(s.dashboardRevenuePeriod)?s.dashboardRevenuePeriod:'month';
+    const eligible=(data().payments||[]).filter(payment=>!paymentIsCancelled(payment)&&paymentIsPaid(payment));
+    const dateOf=payment=>String(payment.paymentDate||payment.dueDate||payment.createdAt||'').slice(0,10);
+    const validDates=eligible.map(dateOf).filter(date=>/^\d{4}-\d{2}-\d{2}$/.test(date));
+    const years=revenueRangeYears255([...new Set(validDates.map(date=>date.slice(0,4)))]);
+    const currentYear=today().slice(0,4);
+    const selectedYear=years.includes(String(s.dashboardRevenueYear||''))?String(s.dashboardRevenueYear):years.includes(currentYear)?currentYear:years.at(-1);
+    const dataMonths=[...new Set(validDates.filter(date=>date.startsWith(`${selectedYear}-`)).map(date=>date.slice(0,7)))].sort();
+    const currentMonth=today().slice(0,7);
+    let selectedMonth=String(s.dashboardRevenueMonth||'');
+    if(!selectedMonth.startsWith(`${selectedYear}-`))selectedMonth=dataMonths.includes(currentMonth)?currentMonth:(dataMonths.at(-1)||`${selectedYear}-01`);
+    const daysInMonth=new Date(Number(selectedMonth.slice(0,4)),Number(selectedMonth.slice(5,7)),0).getDate()||31;
+    let selectedDay=String(s.dashboardRevenueDay||'');
+    const currentDay=today();
+    if(!selectedDay.startsWith(`${selectedMonth}-`))selectedDay=currentDay.startsWith(`${selectedMonth}-`)?currentDay:`${selectedMonth}-01`;
+    if(Number(selectedDay.slice(8,10))>daysInMonth)selectedDay=`${selectedMonth}-${String(daysInMonth).padStart(2,'0')}`;
+
+    s.dashboardRevenuePeriod=period;s.dashboardRevenueYear=selectedYear;s.dashboardRevenueMonth=selectedMonth;s.dashboardRevenueDay=selectedDay;
+    const keys=period==='year'?years:period==='month'?Array.from({length:12},(_,index)=>`${selectedYear}-${String(index+1).padStart(2,'0')}`):Array.from({length:daysInMonth},(_,index)=>`${selectedMonth}-${String(index+1).padStart(2,'0')}`);
     const receiptMap=new Map(),expenseMap=new Map(),taxMap=new Map(),serviceMap=new Map(),productMap=new Map(),methodMap=new Map(),serviceMethodMap=new Map();
     const add=(map,key,value)=>{if(key)map.set(key,(map.get(key)||0)+num(value));};
-    const addMethod=(key,method,value)=>{if(!key)return;const methods=methodMap.get(key)||new Map(),label=String(method||'Não informado').trim()||'Não informado';methods.set(label,(methods.get(label)||0)+num(value));methodMap.set(key,methods);};
-    const addServiceMethod=(key,method,value)=>{if(!key)return;const methods=serviceMethodMap.get(key)||new Map(),label=String(method||'Não informado').trim()||'Não informado';methods.set(label,(methods.get(label)||0)+num(value));serviceMethodMap.set(key,methods);};
-    for(const payment of data().payments||[]){
-      if(paymentIsCancelled(payment)||!paymentIsPaid(payment))continue;
-      const date=payment.paymentDate||payment.dueDate||payment.createdAt,key=revenueBucketKey(date,period);if(!key)continue;
+    const addMethod=(map,key,method,value)=>{if(!key)return;const methods=map.get(key)||new Map(),label=String(method||'Não informado').trim()||'Não informado';methods.set(label,(methods.get(label)||0)+num(value));map.set(key,methods);};
+    for(const payment of eligible){
+      const date=dateOf(payment);if(!/^\d{4}-\d{2}-\d{2}$/.test(date))continue;
+      if(period==='month'&&date.slice(0,4)!==selectedYear)continue;
+      if(period==='day'&&date.slice(0,7)!==selectedMonth)continue;
+      const key=revenueBucketKey(date,period);if(!keys.includes(key))continue;
       const type=normalizeText(payment.type),value=num(payment.value),fee=num(payment.fee);
       if(type==='despesa'){if(/imposto|taxa|tribut/.test(normalizeText(payment.category||payment.notes)))add(taxMap,key,value);else add(expenseMap,key,value);continue;}
-      add(receiptMap,key,value);add(taxMap,key,fee);addMethod(key,payment.paymentMethod||payment.method||payment.form,value);
+      add(receiptMap,key,value);add(taxMap,key,fee);addMethod(methodMap,key,payment.paymentMethod||payment.method||payment.form,value);
       const order=findOrder(payment.orderId),items=order?orderItems(order.id):[];
       const serviceTotal=items.filter(x=>normalizeText(x.type)==='servico').reduce((sum,x)=>sum+num(x.subtotal),0);
       const productTotal=items.filter(x=>normalizeText(x.type)==='produto').reduce((sum,x)=>sum+num(x.subtotal),0);
       const base=serviceTotal+productTotal,serviceValue=base>0?value*(serviceTotal/base):value;
-      if(base>0){add(serviceMap,key,serviceValue);add(productMap,key,value*(productTotal/base));}
-      else add(serviceMap,key,serviceValue);
-      addServiceMethod(key,payment.paymentMethod||payment.method||payment.form,serviceValue);
+      if(base>0){add(serviceMap,key,serviceValue);add(productMap,key,value*(productTotal/base));}else add(serviceMap,key,serviceValue);
+      addMethod(serviceMethodMap,key,payment.paymentMethod||payment.method||payment.form,serviceValue);
     }
-    const keys=[...new Set([...receiptMap.keys(),...expenseMap.keys()])].sort();
-    const limit=period==='day'?31:period==='month'?12:8,visible=keys.slice(-limit);
-    const selected=visible.includes(s.dashboardRevenueSelected)?s.dashboardRevenueSelected:(visible.at(-1)||'');
-    s.dashboardRevenuePeriod=period;s.dashboardRevenueSelected=selected;
-    const points=visible.map(key=>({key,label:revenueBucketLabel(key,period),revenue:receiptMap.get(key)||0,service:serviceMap.get(key)||0,product:productMap.get(key)||0,expenses:expenseMap.get(key)||0,taxes:taxMap.get(key)||0,methods:[...(methodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1]),serviceMethods:[...(serviceMethodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1])}));
-    return {period,selected,points,selectedPoint:points.find(x=>x.key===selected)||{key:'',label:'Sem dados',revenue:0,service:0,product:0,expenses:0,taxes:0,methods:[],serviceMethods:[]}};
+    const preferred=period==='year'?selectedYear:period==='month'?selectedMonth:selectedDay;
+    const selected=keys.includes(preferred)?preferred:keys.at(-1)||'';
+    s.dashboardRevenueSelected=selected;
+    const points=keys.map(key=>({key,label:revenueBucketLabel(key,period),revenue:receiptMap.get(key)||0,service:serviceMap.get(key)||0,product:productMap.get(key)||0,expenses:expenseMap.get(key)||0,taxes:taxMap.get(key)||0,methods:[...(methodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1]),serviceMethods:[...(serviceMethodMap.get(key)||new Map()).entries()].sort((a,b)=>b[1]-a[1])}));
+    const selectedPoint=points.find(x=>x.key===selected)||{key:'',label:'Sem dados',revenue:0,service:0,product:0,expenses:0,taxes:0,methods:[],serviceMethods:[]};
+    const context=period==='year'?'Selecione um ano para abrir os meses.':period==='month'?`Ano selecionado: ${selectedYear}`:`Mês selecionado: ${revenueMonthLongLabel(selectedMonth)}`;
+    return {period,selected,selectedYear,selectedMonth,selectedDay,points,selectedPoint,context};
   }
   function compositionRows255(parts){const max=Math.max(1,...parts.map(x=>num(x[1])));return parts.map(([label,value])=>`<div class="composition-row-v255"><span>${esc(label)}</span><div><i style="--composition-width:${Math.round(num(value)/max*100)}%"></i></div><b>${currency(value)}</b></div>`).join('');}
   function servicePaymentRows255(entries=[]){
@@ -455,10 +485,11 @@
   }
   function dashboardRevenueBody(){
     const model=dashboardRevenueModel(),max=Math.max(1,...model.points.map(x=>x.revenue));
-    const chart=model.points.length?`<div class="revenue-chart-v255" role="img" aria-label="Gráfico de faturamento">${model.points.map(x=>`<button type="button" class="revenue-bar-column-v255 ${x.key===model.selected?'is-selected':''}" data-action="dashboard-revenue-select" data-key="${attr(x.key)}" title="${attr(x.label)} · ${attr(currency(x.revenue))}"><span class="revenue-bar-v255" style="--revenue-height:${Math.max(4,Math.round(x.revenue/max*100))}%"></span><small>${esc(x.label)}</small></button>`).join('')}</div>`:'<div class="empty">Ainda não existem lançamentos para o período.</div>';
+    const chart=model.points.length?`<div class="revenue-chart-v255" role="group" aria-label="Gráfico de faturamento">${model.points.map(x=>`<button type="button" class="revenue-bar-column-v255 ${x.key===model.selected?'is-selected':''}" data-action="dashboard-revenue-select" data-key="${attr(x.key)}" title="${attr(x.key)} · ${attr(currency(x.revenue))}"><span class="revenue-bar-v255" style="--revenue-height:${Math.max(4,Math.round(x.revenue/max*100))}%"></span><small>${esc(x.label)}</small></button>`).join('')}</div>`:'<div class="empty">Ainda não existem lançamentos para o período.</div>';
     const p=model.selectedPoint,categories=[['Receita de Serviços',p.service],['Receita de Produtos',p.product],['Despesas',p.expenses],['Impostos',p.taxes]],methods=servicePaymentRows255(p.serviceMethods);
-    return `<div class="revenue-widget-v255"><div class="revenue-period-tabs-v255">${[['day','Dia'],['month','Mês'],['year','Ano']].map(([id,label])=>`<button type="button" class="${model.period===id?'active':''}" data-action="dashboard-revenue-period" data-period="${id}">${label}</button>`).join('')}</div>${chart}<div class="revenue-breakdowns-v255"><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Composição financeira · ${esc(p.label)}</strong><span>${currency(p.revenue)}</span></div>${compositionRows255(categories)}</div><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Formas de pagamento da receita de serviços · ${esc(p.label)}</strong><span>${currency(p.service)}</span></div>${compositionRows255(methods)}</div></div></div>`;
+    return `<div class="revenue-widget-v255"><div class="revenue-period-tabs-v255">${[['year','Ano'],['month','Mês'],['day','Dia']].map(([id,label])=>`<button type="button" class="${model.period===id?'active':''}" data-action="dashboard-revenue-period" data-period="${id}">${label}</button>`).join('')}</div><div class="revenue-filter-context-v260">${esc(model.context)}</div>${chart}<div class="revenue-scroll-controls-v260" aria-label="Navegar pelo gráfico"><button type="button" data-action="dashboard-revenue-scroll" data-dir="-1" title="Rolar gráfico para a esquerda" aria-label="Rolar gráfico para a esquerda">${icon('chevronLeft')}</button><button type="button" data-action="dashboard-revenue-scroll" data-dir="1" title="Rolar gráfico para a direita" aria-label="Rolar gráfico para a direita">${icon('chevronRight')}</button></div><div class="revenue-breakdowns-v255"><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Composição financeira</strong><span>${currency(p.revenue)}</span></div>${compositionRows255(categories)}</div><div class="revenue-composition-v255 revenue-breakdown-v255"><div class="composition-heading-v255"><strong>Formas de pagamento</strong><span>${currency(p.service)}</span></div>${compositionRows255(methods)}</div></div></div>`;
   }
+
 
   renderDashboard = function(){
     const d=data(),month=today().slice(0,7),orders=d.serviceOrders.filter(orderNotCancelled),open=orders.filter(o=>!['concluida','cancelada'].includes(normalizeText(o.status)));

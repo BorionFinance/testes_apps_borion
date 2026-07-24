@@ -255,10 +255,20 @@
       await persist('Filtro de período limpo',section,{media:false});renderView();return;
     }
     if(action==='dashboard-revenue-period'){
-      const settings=profileSettings();settings.dashboardRevenuePeriod=btn.dataset.period;settings.dashboardRevenueSelected='';await persist('Período do faturamento atualizado',btn.dataset.period,{media:false});renderView();return;
+      const settings=profileSettings(),period=btn.dataset.period;if(!['year','month','day'].includes(period))return;
+      settings.dashboardRevenuePeriod=period;await persist('Período do faturamento atualizado',period,{media:false});renderView();return;
     }
     if(action==='dashboard-revenue-select'){
-      profileSettings().dashboardRevenueSelected=btn.dataset.key;await persist('Período do gráfico selecionado',btn.dataset.key,{media:false});renderView();return;
+      const settings=profileSettings(),key=String(btn.dataset.key||''),period=settings.dashboardRevenuePeriod||'month';
+      settings.dashboardRevenueSelected=key;
+      if(period==='year'){settings.dashboardRevenueYear=key;}
+      else if(period==='month'){settings.dashboardRevenueMonth=key;settings.dashboardRevenueYear=key.slice(0,4);}
+      else if(period==='day'){settings.dashboardRevenueDay=key;settings.dashboardRevenueMonth=key.slice(0,7);settings.dashboardRevenueYear=key.slice(0,4);}
+      await persist('Período do gráfico selecionado',key,{media:false});renderView();return;
+    }
+    if(action==='dashboard-revenue-scroll'){
+      const chart=btn.closest('.revenue-widget-v255')?.querySelector('.revenue-chart-v255');if(!chart)return;
+      chart.scrollBy({left:(Number(btn.dataset.dir)||1)*Math.max(260,chart.clientWidth*.72),behavior:'smooth'});return;
     }
     if(action==='generate-pdf-background'){await generatePdfForOrder(btn.dataset.id,false);return;}
     return await handleActionBase.call(this,btn,...rest);
