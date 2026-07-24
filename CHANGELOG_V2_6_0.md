@@ -25,3 +25,12 @@
 
 - Versão de aplicação, manifesto, service worker e parâmetros de cache atualizados para 2.6.0.
 - O service worker elimina caches antigos do Marco Iris na ativação.
+
+## Ajuste visual dos editores de layout — revisão 24/07/2026
+
+- Removido o texto **Arraste** exibido sobre cada bloco em todos os editores unificados.
+- Eliminada a faixa vazia superior que era reservada para esse texto.
+- Campos simples agora iniciam com altura mais compacta.
+- O redimensionamento pelo canto inferior direito continua ativo para aumentar largura e altura.
+- Nenhuma regra de posição livre, salvamento, restauração ou faturamento foi alterada.
+

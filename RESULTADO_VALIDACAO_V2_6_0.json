@@ -97,7 +97,7 @@
     {
       "name": "Salvar layout da Nova OSV grava coordenadas",
       "ok": true,
-      "detail": "{\"order\":7008,\"x\":8,\"y\":70,\"span\":5,\"rows\":6}"
+      "detail": "{\"order\":7008,\"x\":8,\"y\":70,\"span\":5,\"rows\":4}"
     },
     {
       "name": "Layout da Nova OSV salvo reaparece",

@@ -271,19 +271,20 @@
   }
   function modalDefaultRows256(item){
     const id=String(item.dataset.osvComponent||item.dataset.clientComponent||item.dataset.layoutComponent||item.dataset.layoutItemV256||'');
-    if(id==='clientId')return 7;
-    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 6;
-    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 10;
+    // Campos comuns começam baixos; o usuário continua podendo aumentar pelo canto.
+    if(id==='clientId')return 4;
+    if(['openedAt','completedAt','status','equipmentType','brandModel','serialNumber','accessPassword','accessories'].includes(id))return 4;
+    if(['reportedIssue','technicalReport','clientNotes','internalNotes'].includes(id))return 8;
     if(id==='itemsField')return 22;
     if(['paymentsField','photosField'].includes(id))return 16;
     const isField=item.matches('.field'),isCheck=item.matches('.check-field'),hasTextarea=!!item.querySelector('textarea');
-    if(isCheck)return 5;
-    if(isField)return hasTextarea?10:6;
+    if(isCheck)return 4;
+    if(isField)return hasTextarea?8:4;
     if(item.matches('.form-section,section.card')){
       if(item.querySelector('table,[data-photo-stage],[data-order-items-editor],#order-items-editor,#order-payments-editor'))return 18;
       return 12;
     }
-    return 10;
+    return 8;
   }
   function modalItemRect256(item,index=0){
     const id=item.dataset.layoutItemV256||`item-${index}`;
